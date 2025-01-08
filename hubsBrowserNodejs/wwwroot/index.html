@@ -7,6 +7,9 @@
     <link rel="icon" type="image/x-icon" href="https://cdn.autodesk.io/favicon.ico">
     <link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.css">
     <link rel="stylesheet" href="https://unpkg.com/inspire-tree-dom@4.0.6/dist/inspire-tree-light.min.css">
+    
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
+
     <link rel="stylesheet" href="/main.css">
 
     <title>Autodesk Platform Services: Hubs Browser</title>
@@ -16,16 +19,189 @@
     <div id="header">
         <img class="logo" src="https://cdn.autodesk.io/logo/black/stacked.png" alt="Autodesk Platform Services">
         <span class="title">Hubs Browser</span>
-        <button id="login" style="visibility: hidden;">Login</button>
+        <span data-toggle="modal" data-target="#defineActivityModal" title="Configure AppBundle & Activity">
+            <button class="btn btn-sm btn-primary">Configure</button>
+        </span>
+        <button id="login" style="visibility: hidden;">Login</button>        
     </div>
-    <div id="sidebar">
-        <div id="tree"></div>
+    
+    <div id="content">
+        <div id="sidebar">
+            <h4>Seleccionar archivo Revit</h4>
+            <div id="tree">
+                <!-- Aquí el contenido del árbol -->
+            </div>
+        </div>
+    
+        <div id="preview">
+            <h2>Visor del modelo</h2>
+            <div id="apsViewer"></div>
+        </div>
+    
+        <div id="exportSection">
+            <h2>Exportar a PDF</h2>
+            <form>
+            <label>Seleccionar tipos de vista</label>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="drawingSheet" checked>
+                </span>
+                <label class="form-control">Drawing Sheet</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="threeD" checked>
+                </span>
+                <label class="form-control">3D View</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="detail" checked>
+                </span>
+                <label class="form-control">Detail</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="elevation" checked>
+                </span>
+                <label class="form-control">Elevation</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="floorPlan" checked>
+                </span>
+                <label class="form-control">Floor Plan</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="section" checked>
+                </span>
+                <label class="form-control">Section</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="rendering" checked>
+                </span>
+                <label class="form-control">Rendering</label>
+            </div>
+            <small>Nota: Este ejemplo sólo exporta máximo 5 vistas.</small>
+            <br><br>
+            <div style="text-align: center;">
+                <button class="btn btn-primary" id="startWorkitem">
+                    <span class="glyphicon glyphicon-play"></span> Exportar
+                </button>
+                <button class="btn btn-primary" id="cancelBtn" disabled>
+                    <span class="glyphicon glyphicon-stop"></span> Cancelar
+                </button>
+            </div>
+        </form>
+        <h4>Progreso</h4>
+        <div class="progress progress-striped active">
+            <div id="parametersUpdateProgressBar" class="progress-bar progress-bar-success" role="progressbar"
+                aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                <span class="sr-only">Progreso</span>
+            </div>
+        </div>
+        </div>
     </div>
-    <div id="preview"></div>
+
+
+    
+    <div id="exportSection" style="width: 25%; float: left; padding: 1em; background-color: #f8f9fa;">
+        <h2 style="text-align: center;">Exportar a PDF</h2>
+        <form>
+            <label>Seleccionar tipos de vista</label>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="drawingSheet" checked>
+                </span>
+                <label class="form-control">Drawing Sheet</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="threeD" checked>
+                </span>
+                <label class="form-control">3D View</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="detail" checked>
+                </span>
+                <label class="form-control">Detail</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="elevation" checked>
+                </span>
+                <label class="form-control">Elevation</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="floorPlan" checked>
+                </span>
+                <label class="form-control">Floor Plan</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="section" checked>
+                </span>
+                <label class="form-control">Section</label>
+            </div>
+            <div class="input-group">
+                <span class="input-group-addon">
+                    <input type="checkbox" id="rendering" checked>
+                </span>
+                <label class="form-control">Rendering</label>
+            </div>
+            <small>Nota: Este ejemplo sólo exporta máximo 5 vistas.</small>
+            <br><br>
+            <div style="text-align: center;">
+                <button class="btn btn-primary" id="startWorkitem">
+                    <span class="glyphicon glyphicon-play"></span> Exportar
+                </button>
+                <button class="btn btn-primary" id="cancelBtn" disabled>
+                    <span class="glyphicon glyphicon-stop"></span> Cancelar
+                </button>
+            </div>
+        </form>
+        <h4>Progreso</h4>
+        <div class="progress progress-striped active">
+            <div id="parametersUpdateProgressBar" class="progress-bar progress-bar-success" role="progressbar"
+                aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                <span class="sr-only">Progreso</span>
+            </div>
+        </div>
+    </div>
+    
+
+
+    <!-- Modal Define AppBundle & Activity -->
+    <div class="modal fade" id="defineActivityModal" tabindex="-1" role="dialog" aria-labelledby="defineActivityModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="defineActivityModalLabel">Configure AppBundle & Activity</h4>
+                </div>
+                <div class="modal-body">
+                    <!-- Contenido del modal -->
+                    <p>Configure your AppBundle & Activity here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://unpkg.com/inspire-tree@4.3.1/dist/inspire-tree.js"></script>
     <script src="https://unpkg.com/inspire-tree-dom@4.0.6/dist/inspire-tree-dom.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script src="/main.js" type="module"></script>
 </body>
 
