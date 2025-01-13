@@ -1,24 +1,23 @@
 // wwwroot/js/APSDesignAutomation.js
+
 $(document).ready(function () {
-  // 1) Preparar listas iniciales (Activities, Engines, Bundles)
   prepareLists();
 
-  // 2) Botones de configuración:
+  // Botones
   $("#clearAccount").click(clearAccount);
   $("#defineActivityShow").click(defineActivityModal);
   $("#createAppBundleActivity").click(createAppBundleActivity);
 
-  // 3) Botones de exportar a PDF
-  $("#startWorkitem").click(startExportPDF); 
+  // Exportar PDF
+  $("#startWorkitem").click(startExportPDF);
   $("#cancelBtn").click(cancelExportPDF);
 
-  // 4) Iniciamos conexión Socket.IO
+  // Socket.IO
   startConnection();
 });
 
 /**
  * PARTE 1: LISTAS Y CREACIÓN DE APPBUNDLE & ACTIVITY
- * (MISMA ESTRUCTURA QUE EL EJEMPLO ORIGINAL)
  */
 function prepareLists() {
   list("activity", "/api/aps/designautomation/activities");
@@ -42,50 +41,52 @@ function list(control, endpoint) {
           );
         });
       }
+      writeLog(`Successfully listed ${control}: ${items ? items.length : 0} item(s).`);
     },
     error: function (err) {
       console.error("Error listing " + control, err);
+      writeLog(`Failed to list ${control}: ${err.statusText || err.message}`);
     }
   });
 }
 
-/** Elimina todas las Activities y AppBundles de tu cuenta. */
 function clearAccount() {
-  if (
-    !confirm(
-      "Clear existing activities & appbundles? Esto es irreversible."
-    )
-  ) {
+  if (!confirm("Clear existing activities & appbundles? Esto es irreversible.")) {
     return;
   }
-
   $.ajax({
     url: "/api/aps/designautomation/account",
     method: "DELETE",
     success: function () {
-      writeLog("Account cleared, all appbundles & activities deleted");
       prepareLists();
+      writeLog("Account cleared, all appbundles & activities deleted");
     },
     error: function (err) {
-      console.error(err);
+      console.error("Failed to clear account:", err);
+      writeLog("Failed to clear account: " + (err.statusText || err.message));
       alert("Failed to clear account.");
     }
   });
 }
 
-/** Muestra el modal con <select id="localBundles"> y <select id="engines"> */
 function defineActivityModal() {
   $("#defineActivityModal").modal();
 }
 
-/** Crea/actualiza AppBundle & Activity */
+/**
+ * Esta función cierra el modal inmediatamente (con .toggle()),
+ * tal como en el ejemplo original, y luego llama a createAppBundle() y createActivity().
+ */
 function createAppBundleActivity() {
   startConnection(function () {
-    writeLog("Defining appbundle and activity for " + $("#engines").val());
-    $("#defineActivityModal").modal("toggle");
+    writeLog("Defining appbundle and activity for engine: " + $("#engines").val());
+
+    // Igual que el ejemplo: cierra el modal (toggle) y luego crea
+    $("#defineActivityModal").modal("toggle"); 
 
     createAppBundle(function () {
       createActivity(function () {
+        // Refresca la lista de Activities y Bundles
         prepareLists();
       });
     });
@@ -103,13 +104,11 @@ function createAppBundle(cb) {
       engine: $("#engines").val()
     }),
     success: function (res) {
-      writeLog("AppBundle: " + res.appBundle + ", v" + res.version);
+      writeLog(`AppBundle created/updated: ${res.appBundle}, v${res.version}`);
       if (cb) cb();
     },
     error: function (xhr, ajaxOptions, thrownError) {
-      writeLog(
-        " -> " + getErrorMsg(xhr, thrownError)
-      );
+      writeLog("Failed to create AppBundle: " + getErrorMsg(xhr, thrownError));
     }
   });
 }
@@ -125,29 +124,24 @@ function createActivity(cb) {
       engine: $("#engines").val()
     }),
     success: function (res) {
-      writeLog("Activity: " + res.activity);
+      writeLog("Activity created/updated: " + res.activity);
       if (cb) cb();
     },
     error: function (xhr, ajaxOptions, thrownError) {
-      writeLog(
-        " -> " + getErrorMsg(xhr, thrownError)
-      );
+      writeLog("Failed to create Activity: " + getErrorMsg(xhr, thrownError));
     }
   });
 }
 
+
 /**
- * PARTE 2: EXPORTACIÓN A PDF (checklists, cancelación, barra de progreso)
- * Reemplaza la antigua startWorkitem() con la lógica de PDF
+ * PARTE 2: EXPORTACIÓN A PDF
  */
 let workingItem = null;
 
-/** Inicia el WorkItem de exportar PDF */
 async function startExportPDF() {
-  // Por ejemplo, obtener la URN/Versión
   const versionStorage = getSelectedVersionStorage();
 
-  // Leer checkboxes
   const drawingSheet = $('#drawingSheet').prop('checked');
   const threeD       = $('#threeD').prop('checked');
   const detail       = $('#detail').prop('checked');
@@ -156,20 +150,9 @@ async function startExportPDF() {
   const section      = $('#section').prop('checked');
   const rendering    = $('#rendering').prop('checked');
 
-  // Validación
-  if (
-    !drawingSheet &&
-    !threeD &&
-    !detail &&
-    !elevation &&
-    !floorPlan &&
-    !section &&
-    !rendering
-  ) {
+  if (!drawingSheet && !threeD && !detail && !elevation && !floorPlan && !section && !rendering) {
     return alert("Selecciona al menos un tipo de vista");
   }
-
-  // Verificar Activity
   if (!$("#activity").val()) {
     return alert("Por favor selecciona una Actividad antes de exportar.");
   }
@@ -179,12 +162,8 @@ async function startExportPDF() {
     writeLog("Iniciando exportación a PDF...");
 
     try {
-      // Llamada a tu endpoint real
-      // (ajusta GET o POST según tu implementación)
       const res = await $.ajax({
-        url: `/api/aps/designautomation/v1/revit/${encodeURIComponent(
-          versionStorage
-        )}/pdf`,
+        url: `/api/aps/designautomation/v1/revit/${encodeURIComponent(versionStorage)}/pdf`,
         type: "GET",
         data: {
           DrawingSheet: drawingSheet,
@@ -199,11 +178,11 @@ async function startExportPDF() {
         }
       });
 
-      // El backend debería retornar { workItemId, workItemStatus...}
       workingItem = res.workItemId;
+      writeLog(`Workitem created. ID: ${workingItem}`);
       updateStatus(res.workItemStatus || "pending");
     } catch (err) {
-      console.error(err);
+      console.error("Error starting PDF export:", err);
       writeLog("Falló la creación de WorkItem: " + (err.message || err));
       updateStatus("failed");
     }
@@ -218,21 +197,20 @@ async function cancelExportPDF() {
 
   try {
     await $.ajax({
-      url: `/api/aps/designautomation/v1/revit/${encodeURIComponent(
-        workingItem
-      )}`,
+      url: `/api/aps/designautomation/v1/revit/${encodeURIComponent(workingItem)}`,
       type: "DELETE"
     });
     writeLog(`WorkItem ${workingItem} cancelado.`);
     updateStatus("cancelled");
     workingItem = null;
   } catch (err) {
-    console.error(err);
+    console.error("Error canceling WorkItem:", err);
+    writeLog("No se pudo cancelar el WorkItem: " + (err.message || err));
     alert("No se pudo cancelar el WorkItem.");
   }
 }
 
-/** Actualiza barra de progreso y mensajes */
+/** Actualiza la barra y el mensaje de estado */
 function updateStatus(status) {
   const progress = $("#parametersUpdateProgressBar");
   const statusText = $("#statusText");
@@ -274,14 +252,12 @@ function updateStatus(status) {
   }
 }
 
-/** Ajusta para obtener la versión "storage" (URN) real */
 function getSelectedVersionStorage() {
-  // Ajusta tu propia lógica para obtener la URN (ej. "urn:adsk.objects:os.object:...")
   return "urn:adsk.objects:os.object:my-bucket/my-file.rvt";
 }
 
 /**
- * PARTE 3: CONEXIÓN SOCKET.IO + LOGS
+ * PARTE 3: SOCKET.IO + LOGS
  */
 var connection;
 var connectionId;
@@ -291,25 +267,21 @@ function startConnection(onReady) {
     if (onReady) onReady();
     return;
   }
-  // Asumiendo <script src="/socket.io/socket.io.js"></script>
   connection = io();
   connection.on("connect", function () {
     connectionId = connection.id;
     if (onReady) onReady();
   });
 
-  // Resultado final (PDF)
   connection.on("downloadResult", function (url) {
     writeLog('<a href="' + url + '" target="_blank">Descarga PDF aquí</a>');
     updateStatus("completed");
   });
 
-  // Report
   connection.on("downloadReport", function (url) {
     writeLog('<a href="' + url + '" target="_blank">Descarga reporte aquí</a>');
   });
 
-  // onComplete
   connection.on("onComplete", function (message) {
     if (typeof message === "object") {
       message = JSON.stringify(message, null, 2);
@@ -317,7 +289,6 @@ function startConnection(onReady) {
     writeLog("onComplete => " + message);
   });
 
-  // onError
   connection.on("onError", function (err) {
     console.error("Workitem Error:", err);
     writeLog("Workitem Error => " + (err.message || err));
@@ -325,12 +296,9 @@ function startConnection(onReady) {
   });
 }
 
-/** Imprime logs en #outputlog (puede ser <div> o <pre>) */
 function writeLog(text) {
   $("#outputlog").append(
-    '<div style="border-top: 1px dashed #C0C0C0; padding: 5px 0;">' +
-      text +
-      "</div>"
+    '<div style="border-top: 1px dashed #C0C0C0; padding: 5px 0;">' + text + "</div>"
   );
   const elem = document.getElementById("outputlog");
   if (elem) {
@@ -338,7 +306,6 @@ function writeLog(text) {
   }
 }
 
-/** Helper: obtiene mensaje de error (opcional) */
 function getErrorMsg(xhr, thrownError) {
   if (xhr.responseJSON && xhr.responseJSON.diagnostic) {
     return xhr.responseJSON.diagnostic;
