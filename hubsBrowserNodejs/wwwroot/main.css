@@ -2,7 +2,7 @@ body, html {
     margin: 0;
     padding: 0;
     height: 100vh;
-    font-family: ArtifaktElement;
+    font-family: ArtifaktElement;    
 }
 
 #header, #sidebar, #preview, #exportSection {
@@ -26,15 +26,58 @@ body, html {
     overflow-y: scroll;
 }
 
-#preview {
-    width: 50%; /* Ajustar ancho del visor 3D */
-    left: 25%; /* Se alinea después del sidebar */
-    top: 3em;
-    bottom: 0;
-    background-color: #f4f4f4;
-    border-left: 1px solid #ddd;
-    overflow: hidden;
+/* Estilo para el título del sidebar */
+#sidebar h4 {
+    font-family: 'Arial', sans-serif; /* Cambia el tipo de letra */
+    font-size: 1.2em; /* Tamaño del texto */
+    font-weight: bold; /* Negrita */
+    color: #333; /* Color oscuro */
+    margin-bottom: 1em; /* Espaciado inferior */
+    padding-left: 0.5em; /* Espaciado interno para alineación */
 }
+
+#preview {
+    width: 50%; /* Ocupa la mitad del ancho */
+    left: 25%; /* Alineado después del sidebar */
+    top: 3em; /* Debajo del header */
+    bottom: 0; /* Hasta el final de la ventana */
+    position: absolute;
+    display: flex; /* Usar flexbox para organizar título y visor */
+    flex-direction: column; /* Organizar verticalmente */
+    background-color: #f4f4f4; /* Fondo claro */
+    border-right: 1px solid #ddd; /* Separación con exportación */
+    overflow: hidden; /* Evitar contenido desbordado */
+}
+
+/* Título del visor */
+#preview h2 {
+    font-family: 'Arial', sans-serif; /* Tipo de letra */
+    font-size: 1.2em; /* Tamaño del texto */
+    font-weight: bold; /* Negrita */
+    color: #333; /* Color */
+    margin: 0; /* Eliminar márgenes */
+    padding: 10px 0; /* Espaciado interno */
+    text-align: center; /* Centrado */
+    background-color: #f4f4f4; /* Fondo claro */
+    border-bottom: 1px solid #ddd; /* Línea decorativa */
+    flex-shrink: 0; /* Mantener altura fija */
+    z-index: 2; /* Siempre por encima del visor */
+}
+
+/* Contenedor del visor */
+#apsViewer {
+    flex-grow: 1; /* Ocupa el espacio restante */
+    background-color: #fff; /* Fondo blanco */
+    border: 1px solid #ccc; /* Borde gris claro */
+    border-radius: 4px; /* Bordes redondeados */
+    overflow: hidden; /* Evitar contenido desbordado */
+    z-index: 1; /* Debajo del título */
+    margin: 0; /* Eliminar márgenes */
+    padding: 0; /* Eliminar padding */
+}
+
+
+
 
 /* Sección de exportación */
 #exportSection {

@@ -13,8 +13,15 @@
   "dependencies": {
     "@aps_sdk/authentication": "^1.0.0-beta.3",
     "@aps_sdk/data-management": "^1.0.0-beta.4",
+    "autodesk.forge.designautomation": "^3.0.5",
+    "body-parser": "^1.20.3",
     "cookie-session": "^2.1.0",
     "dotenv": "^16.4.5",
-    "express": "^4.21.1"
+    "express": "^4.21.2",
+    "express-formidable": "^1.2.0",
+    "forge-apis": "^0.9.10",
+    "form-data": "^4.0.1",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.8.1"
   }
 }

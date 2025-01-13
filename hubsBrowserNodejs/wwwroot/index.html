@@ -9,16 +9,16 @@
     <link rel="stylesheet" href="https://unpkg.com/inspire-tree-dom@4.0.6/dist/inspire-tree-light.min.css">
     
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css">
-
+    
     <link rel="stylesheet" href="/main.css">
 
-    <title>Autodesk Platform Services: Hubs Browser</title>
+    <title>AECOM: Export PDF</title>
 </head>
 
 <body>
     <div id="header">
         <img class="logo" src="https://cdn.autodesk.io/logo/black/stacked.png" alt="Autodesk Platform Services">
-        <span class="title">Hubs Browser</span>
+        <span class="title">Export PDF</span>
         <span data-toggle="modal" data-target="#defineActivityModal" title="Configure AppBundle & Activity">
             <button class="btn btn-sm btn-primary">Configure</button>
         </span>
@@ -34,7 +34,7 @@
         </div>
     
         <div id="preview">
-            <h2>Visor del modelo</h2>
+            <h2>Model</h2>
             <div id="apsViewer"></div>
         </div>
     
@@ -176,32 +176,75 @@
 
 
     <!-- Modal Define AppBundle & Activity -->
-    <div class="modal fade" id="defineActivityModal" tabindex="-1" role="dialog" aria-labelledby="defineActivityModalLabel">
+    <div class="modal fade" id="defineActivityModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+        
+                <!-- Encabezado del Modal -->
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                    <h4 class="modal-title" id="defineActivityModalLabel">Configure AppBundle & Activity</h4>
+                <button type="button"
+                        class="close"
+                        data-dismiss="modal"
+                        aria-label="Cancel">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    Create/Update AppBundle & Activity
+                </h4>
                 </div>
+        
+                <!-- Cuerpo del Modal -->
                 <div class="modal-body">
-                    <!-- Contenido del modal -->
-                    <p>Configure your AppBundle & Activity here.</p>
+                <div class="alert alert-warning">
+                    <center>
+                    You just need to define AppBundle &amp; Activity once.<br />
+                    If the plugin code changed, redefine (creates a new version).
+                    </center>
                 </div>
+                <div class="form-group">
+                    <label for="localBundles">Select a local AppBundle:</label>
+                    <select class="form-control" id="localBundles"></select>
+                    <b>Tip:</b> Make sure .ZIP bundles are placed at <b>/bundles/</b> folder
+                </div>
+                <div class="form-group">
+                    <label for="engines">Select engine:</label>
+                    <select class="form-control" id="engines"></select>
+                </div>
+                For this sample the .ZIP name is used as suffix to define
+                <b>AppBundle</b> and <b>Activity</b> names.
+                Activities will have file and params input, and file output.
+                </div>
+        
+                <!-- Footer del modal -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary">Save</button>
+                <button class="btn btn-danger" id="clearAccount">
+                    Clear account
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        id="createAppBundleActivity">
+                    Create/Update
+                </button>
                 </div>
             </div>
         </div>
     </div>
+  
+
+    
 
 
     <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://unpkg.com/inspire-tree@4.3.1/dist/inspire-tree.js"></script>
     <script src="https://unpkg.com/inspire-tree-dom@4.0.6/dist/inspire-tree-dom.min.js"></script>
+
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script src="/js/DAConfigure.js"></script>
+    <script src="/js/APSDesignAutomation.js"></script>
     <script src="/main.js" type="module"></script>
 </body>
 
