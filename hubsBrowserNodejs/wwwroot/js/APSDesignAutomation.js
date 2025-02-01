@@ -20,9 +20,10 @@ $(document).ready(function () {
  * PARTE 1: LISTAS Y CREACIÓN DE APPBUNDLE & ACTIVITY
  */
 function prepareLists() {
-  list("activity", "/api/aps/designautomation/activities");
-  list("engines", "/api/aps/designautomation/engines");
-  list("localBundles", "/api/appbundles");
+  // list("activity", "/api/aps/designautomation/activities");
+  list("activity", "/api/designautomation/activities");
+  list("engines", "/api/designautomation/engines");
+  list("localBundles", "/appbundles");
 }
 
 function list(control, endpoint) {
@@ -55,7 +56,7 @@ function clearAccount() {
     return;
   }
   $.ajax({
-    url: "/api/aps/designautomation/account",
+    url: "/api/designautomation/account",
     method: "DELETE",
     success: function () {
       prepareLists();
@@ -96,7 +97,7 @@ function createAppBundleActivity() {
 /** POST /api/aps/designautomation/appbundles */
 function createAppBundle(cb) {
   $.ajax({
-    url: "/api/aps/designautomation/appbundles",
+    url: "/api/designautomation/appbundles",
     method: "POST",
     contentType: "application/json",
     data: JSON.stringify({
@@ -116,7 +117,7 @@ function createAppBundle(cb) {
 /** POST /api/aps/designautomation/activities */
 function createActivity(cb) {
   $.ajax({
-    url: "/api/aps/designautomation/activities",
+    url: "/api/designautomation/activities",
     method: "POST",
     contentType: "application/json",
     data: JSON.stringify({
@@ -125,6 +126,11 @@ function createActivity(cb) {
     }),
     success: function (res) {
       writeLog("Activity created/updated: " + res.activity);
+      // Aquí guardamos la Activity devuelta por el servidor
+      if (res.activity && typeof res.activity === "string") {
+        $("#selectedActivity").val(res.activity);
+      }
+
       if (cb) cb();
     },
     error: function (xhr, ajaxOptions, thrownError) {
@@ -153,31 +159,52 @@ async function startExportPDF() {
   if (!drawingSheet && !threeD && !detail && !elevation && !floorPlan && !section && !rendering) {
     return alert("Selecciona al menos un tipo de vista");
   }
-  if (!$("#activity").val()) {
-    return alert("Por favor selecciona una Actividad antes de exportar.");
-  }
+  // if (!$("#activity").val()) {
+  //   return alert("Por favor selecciona una Actividad antes de exportar.");
+  // }
+ const activityName = $("#selectedActivity").val();
+ if (!activityName) {
+  return alert("Antes de exportar, crea/actualiza la Activity en Configure.");
+ }
 
   startConnection(async function () {
     updateStatus("started");
     writeLog("Iniciando exportación a PDF...");
 
     try {
-      const res = await $.ajax({
-        url: `/api/aps/designautomation/v1/revit/${encodeURIComponent(versionStorage)}/pdf`,
-        type: "GET",
-        data: {
-          DrawingSheet: drawingSheet,
-          ThreeD: threeD,
-          Detail: detail,
-          Elevation: elevation,
-          FloorPlan: floorPlan,
-          Section: section,
-          Rendering: rendering,
-          ActivityName: $("#activity").val(),
-          browserConnectionId: connectionId
-        }
-      });
+      // const res = await $.ajax({
+      //   url: `/api/designautomation/v1/revit/${encodeURIComponent(versionStorage)}/pdf`,
+      //   type: "GET",
+      //   data: {
+      //     DrawingSheet: drawingSheet,
+      //     ThreeD: threeD,
+      //     Detail: detail,
+      //     Elevation: elevation,
+      //     FloorPlan: floorPlan,
+      //     Section: section,
+      //     Rendering: rendering,
+      //     ActivityName: $("#activity").val(),
+      //     browserConnectionId: connectionId
+      //   }
+      // });
 
+      const res = await $.ajax({
+              url: "/api/designautomation/v1/revit/exportPDF", // <-- la ruta POST
+              type: "POST",
+              contentType: "application/json",
+              data: JSON.stringify({
+              urn: versionStorage,
+              activityName: activityName,
+              drawingSheet: drawingSheet,
+              threeD: threeD,
+              detail: detail,
+              elevation: elevation,
+              floorPlan: floorPlan,
+              section: section,
+              rendering: rendering,
+              browserConnectionId: connectionId
+            })
+         });
       workingItem = res.workItemId;
       writeLog(`Workitem created. ID: ${workingItem}`);
       updateStatus(res.workItemStatus || "pending");
@@ -197,7 +224,7 @@ async function cancelExportPDF() {
 
   try {
     await $.ajax({
-      url: `/api/aps/designautomation/v1/revit/${encodeURIComponent(workingItem)}`,
+      url: `/api/designautomation/v1/revit/${encodeURIComponent(workingItem)}`,
       type: "DELETE"
     });
     writeLog(`WorkItem ${workingItem} cancelado.`);

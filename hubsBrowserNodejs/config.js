@@ -2,6 +2,24 @@
 require('dotenv').config();
 const { Scopes } = require('@aps_sdk/authentication');
 
+const designAutomation = {
+  nickname: "NjVXvdCtBAR7ixAAg3599X16PgZIAyWGDqpvBnG56HQELUDn",  // Ej. tu client_id o tu "ID" del APS account
+  appbundle_activity_alias: "dev", // "prod", "beta", etc.
+
+  URL: {
+    GET_ENGINES_URL: "https://developer.api.autodesk.com/da/us-east/v3/engines",
+    APPBUNDLES_URL:  "https://developer.api.autodesk.com/da/us-east/v3/appbundles",
+    ACTIVITIES_URL:  "https://developer.api.autodesk.com/da/us-east/v3/activities",
+    
+    CREATE_APPBUNDLE_VERSION_URL: "https://developer.api.autodesk.com/da/us-east/v3/appbundles/{0}/versions",
+    UPDATE_APPBUNDLE_ALIAS_URL:   "https://developer.api.autodesk.com/da/us-east/v3/appbundles/{0}/aliases/{1}",
+    CREATE_APPBUNDLE_ALIAS_URL:   "https://developer.api.autodesk.com/da/us-east/v3/appbundles/{0}/aliases",
+    CREATE_ACTIVITY_ALIAS:        "https://developer.api.autodesk.com/da/us-east/v3/activities/{0}/aliases",
+    
+    APPBUNDLE_URL: "https://developer.api.autodesk.com/da/us-east/v3/appbundles/{0}",
+    ACTIVITY_URL:  "https://developer.api.autodesk.com/da/us-east/v3/activities/{0}"
+  }
+};
 // Lee variables de entorno
 let {
   APS_CLIENT_ID,
@@ -68,5 +86,6 @@ module.exports = {
       backoffPolicy: 'exponentialBackoffWithJitter'
     },
     requestTimeout: 13000
-  }
+  },
+  designAutomation 
 };

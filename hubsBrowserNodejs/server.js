@@ -43,13 +43,29 @@ app.use(authRoutes);
 app.use(hubsRoutes);
 
 // 8) Montar rutas de Design Automation en "/api"
-app.use("/api", designAutomationRoutes);
+app.use("/",designAutomationRoutes);
 
 // 9) Iniciar servidor en el puerto deseado
 const finalPort = PORT || 8080;
-app.listen(finalPort, () => {
-  console.log(`Server listening on port ${finalPort}...`);
+
+// server.js
+const http = require("http");
+const server = http.createServer(app);
+
+// Requiere Socket.IO
+const { Server } = require("socket.io");
+const io = new Server(server);
+
+io.on("connection", (socket) => {
+  console.log("a client is connected");
+  socket.on("disconnect", () => console.log("client disconnected"));
 });
 
+server.listen(finalPort, () => {
+  console.log(`Server listening on port ${finalPort}...`);
+});
 // Exportar 'app' en caso de que quieras usarlo en otro lugar (socket.io, etc.)
-module.exports = app;
+module.exports = { app, io };
+
+
+
